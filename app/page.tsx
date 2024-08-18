@@ -71,6 +71,11 @@ export default function Home() {
           <Link href="/examples/generate-ui-streamui"><button style={{ all: 'unset', cursor: 'pointer', color: 'blue', textDecoration: 'underline' }}>Stream Text</button></Link>
         </li>
 
+        <li>
+          <Link href="/examples/newPage"><button style={{ all: 'unset', cursor: 'pointer', color: 'blue', textDecoration: 'underline' }}>Test</button></Link>
+        </li>
+
+
       </main>
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
         <a
