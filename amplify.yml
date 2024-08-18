@@ -1,0 +1,18 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci --cache .npm --prefer-offline --legacy-peer-deps
+    build:
+      commands:
+        - env | grep -e OPENAI_API_KEY -e DATABASE_URL -e GOOGLE_CLIENT_ -e NEXT_PUBLIC_ -e AUTH_ >> .env.production
+        - NODE_ENV=production npx next build
+  artifacts:
+    baseDirectory: .next
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - .next/cache/**/*
+      - .npm/**/*
