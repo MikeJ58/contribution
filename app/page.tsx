@@ -1,6 +1,17 @@
+"use client"
+
 import Image from "next/image";
+import { Link } from "@/components/ui/link";
+import { useRouter } from 'next/navigation';
+
 
 export default function Home() {
+  const router = useRouter();
+
+  const handleRedirect = () => {
+    router.push('/api/chat/page');
+  };
+
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
@@ -47,6 +58,19 @@ export default function Home() {
             Read our docs
           </a>
         </div>
+
+        {/* New Button to Go to Chat Page */}
+        <li>
+          <Link href="/examples/basic-chatbot">
+            <button style={{ all: 'unset', cursor: 'pointer', color: 'blue', textDecoration: 'underline' }}>
+              Chatbot 
+            </button>
+          </Link>
+        </li>
+        <li>
+          <Link href="/examples/generate-ui-streamui"><button style={{ all: 'unset', cursor: 'pointer', color: 'blue', textDecoration: 'underline' }}>Stream Text</button></Link>
+        </li>
+
       </main>
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
         <a
