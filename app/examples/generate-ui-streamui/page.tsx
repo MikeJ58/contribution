@@ -1,29 +1,28 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Dialog } from '@/components/ui/dialog'; // Shadcn Dialog component
+import { Button } from '@/components/ui/button'; // Shadcn Button component
 import { generateResponse } from './action'; // Server-side action to generate responses
 
 export default function Page() {
-  const [open, setOpen] = useState(false); // Controls dialog visibility
-  const [steps, setSteps] = useState<{ question: string, answer: React.ReactNode }[]>([]);
+  const [open, setOpen] = useState(false);
+  const [steps, setSteps] = useState<{ question: string; answer: string }[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [contributions, setContributions] = useState<React.ReactNode[]>([]);
+  const [contributions, setContributions] = useState<{ question: string; answer: string }[]>([]);
 
-  // Optimized function to start generating questions
   const handleGenerateInitial = useCallback(async () => {
     setIsGenerating(true);
-    const firstQuestion = "What is your name?";
-    const firstAnswer = <div>{await generateResponse(firstQuestion)}</div>;
+    const firstQuestion = 'What is your name?';
+    const firstAnswer = await generateResponse(firstQuestion);
 
     setSteps([{ question: firstQuestion, answer: firstAnswer }]);
     setIsGenerating(false);
 
-    // Start generating the next steps in the background
-    const moreQuestions = ["What is your age?", "Where do you live?"];
+    const moreQuestions = ['What is your age?', 'Where do you live?'];
     const promises = moreQuestions.map(async (question) => {
-      const answer = <div>{await generateResponse(question)}</div>;
+      const answer = await generateResponse(question);
       return { question, answer };
     });
 
@@ -40,7 +39,7 @@ export default function Page() {
   }, []);
 
   const handleSave = useCallback(() => {
-    setContributions((prev) => [...prev, ...steps.map((step) => step.answer)]);
+    setContributions((prev) => [...prev, ...steps]);
     setOpen(false);
   }, [steps]);
 
@@ -54,12 +53,9 @@ export default function Page() {
       <div className="max-w-3xl w-full bg-white shadow-md rounded-lg p-6 space-y-4">
         <h1 className="text-2xl font-semibold text-gray-800">Generated Questions and Answers</h1>
         
-        <button
-          onClick={handleOpenDialog}
-          className="p-2 bg-blue-500 text-white rounded-md"
-        >
+        <Button onClick={handleOpenDialog} variant="default">
           Open Dialog
-        </button>
+        </Button>
 
         <Dialog isOpen={open} onClose={() => setOpen(false)}>
           <h2 className="text-lg font-semibold">Generated Questions and Answers</h2>
@@ -73,27 +69,18 @@ export default function Page() {
               </div>
               <div className="mt-4 flex justify-between">
                 {currentStep > 0 && (
-                  <button
-                    onClick={handlePrevious}
-                    className="p-2 bg-gray-200 rounded-md"
-                  >
+                  <Button onClick={handlePrevious} variant="secondary">
                     Previous
-                  </button>
+                  </Button>
                 )}
                 {currentStep < steps.length - 1 ? (
-                  <button
-                    onClick={handleNext}
-                    className="p-2 bg-blue-500 text-white rounded-md"
-                  >
+                  <Button onClick={handleNext} variant="default">
                     Next
-                  </button>
+                  </Button>
                 ) : (
-                  <button
-                    onClick={handleSave}
-                    className="p-2 bg-green-500 text-white rounded-md"
-                  >
+                  <Button onClick={handleSave} variant="default">
                     Save
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -105,7 +92,7 @@ export default function Page() {
           <div className="space-y-4">
             {contributions.map((contribution, index) => (
               <div key={index} className="p-4 bg-gray-100 rounded-md">
-                {contribution}
+                {contribution.answer}
               </div>
             ))}
           </div>
