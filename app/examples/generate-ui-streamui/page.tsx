@@ -11,6 +11,7 @@ export default function Page() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [contributions, setContributions] = useState<{ question: string; answer: string }[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleGenerateInitial = useCallback(async () => {
     setIsGenerating(true);
@@ -38,8 +39,20 @@ export default function Page() {
     setCurrentStep((prev) => Math.max(prev - 1, 0));
   }, []);
 
-  const handleSave = useCallback(() => {
-    setContributions((prev) => [...prev, ...steps]);
+  const handleSave = useCallback(async () => {
+    setIsSaving(true);
+
+    // Generate and stream the final contribution
+    const lastQuestion = "Please summarize the conversation.";
+    const lastAnswer = await generateResponse(lastQuestion);
+
+    setContributions((prev) => [
+      ...prev,
+      ...steps,
+      { question: lastQuestion, answer: lastAnswer },
+    ]);
+
+    setIsSaving(false);
     setOpen(false);
   }, [steps]);
 
@@ -78,8 +91,8 @@ export default function Page() {
                     Next
                   </Button>
                 ) : (
-                  <Button onClick={handleSave} variant="default">
-                    Save
+                  <Button onClick={handleSave} variant="default" disabled={isSaving}>
+                    {isSaving ? "Saving..." : "Save"}
                   </Button>
                 )}
               </div>
