@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect } from 'react';
 
 type DialogProps = {
@@ -6,25 +8,28 @@ type DialogProps = {
   children: React.ReactNode;
 };
 
-export function Dialog({ isOpen, onClose, children }: DialogProps) {
+export const Dialog: React.FC<DialogProps> = ({ isOpen, onClose, children }) => {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = 'auto';
     }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6">
-        <button onClick={onClose} className="absolute top-2 right-2 text-gray-600">
-          ×
-        </button>
+      <div className="bg-white p-4 rounded-lg">
         {children}
+        <button onClick={onClose} className="mt-4 p-2 bg-red-500 text-white rounded-md">
+          Close
+        </button>
       </div>
     </div>
   );
-}
+};
