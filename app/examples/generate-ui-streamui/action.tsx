@@ -4,7 +4,15 @@ import { openai } from '@ai-sdk/openai';
 import { streamUI } from 'ai/rsc';
 import React from 'react';
 
+const promptCache: Record<string, string> = {}; // Simple in-memory cache
+
 export async function generateResponse(prompt: string): Promise<string> {
+  // Check if the prompt is already cached
+  if (promptCache[prompt]) {
+    console.log('Returning cached response for:', prompt);
+    return promptCache[prompt];
+  }
+
   const result = await streamUI({
     model: openai('gpt-4o'),
     messages: [
@@ -21,6 +29,8 @@ export async function generateResponse(prompt: string): Promise<string> {
       }
 
       if (done) {
+        // Cache the response before returning it
+        promptCache[prompt] = jsonResult.answer;
         return jsonResult.answer;
       }
 
