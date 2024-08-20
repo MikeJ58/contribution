@@ -11,17 +11,19 @@ export default function Page() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [contributions, setContributions] = useState<{ question: string; answer: string }[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
 
   const handleGenerateInitial = useCallback(async () => {
     setIsGenerating(true);
-    const firstQuestion = 'What is your name?';
+    const firstQuestion = 'What is your name and what do you do? Please give a detailed response.';
     const firstAnswer = await generateResponse(firstQuestion);
 
     setSteps([{ question: firstQuestion, answer: firstAnswer }]);
     setIsGenerating(false);
 
-    const moreQuestions = ['What is your age?', 'Where do you live?'];
+    const moreQuestions = [
+      'Can you describe a challenging project you have worked on recently and how you overcame it?',
+      'What are your long-term goals and how do you plan to achieve them?',
+    ];
     const promises = moreQuestions.map(async (question) => {
       const answer = await generateResponse(question);
       return { question, answer };
@@ -40,23 +42,28 @@ export default function Page() {
   }, []);
 
   const handleSave = useCallback(async () => {
-    setIsSaving(true);
+    setIsGenerating(true);
 
-    // Generate and stream the final contribution
-    const lastQuestion = "Please summarize the conversation.";
-    const lastAnswer = await generateResponse(lastQuestion);
+    const context = steps.map(step => `${step.question} ${step.answer}`).join(' ');
+
+    const finalQuestion = `Based on the information provided: ${context}, 
+                           can you summarize this into a comprehensive profile that highlights strengths, 
+                           challenges, and future plans?`;
+
+    const finalAnswer = await generateResponse(finalQuestion);
 
     setContributions((prev) => [
       ...prev,
       ...steps,
-      { question: lastQuestion, answer: lastAnswer },
+      { question: finalQuestion, answer: finalAnswer }
     ]);
 
-    setIsSaving(false);
+    setIsGenerating(false);
     setOpen(false);
   }, [steps]);
 
   const handleOpenDialog = useCallback(() => {
+    setIsGenerating(true);
     setOpen(true);
     handleGenerateInitial();
   }, [handleGenerateInitial]);
@@ -73,7 +80,29 @@ export default function Page() {
         <Dialog isOpen={open} onClose={() => setOpen(false)}>
           <h2 className="text-lg font-semibold">Generated Questions and Answers</h2>
           {isGenerating ? (
-            <div>Loading...</div>
+            <div className="flex items-center justify-center">
+              <svg
+                className="animate-spin h-5 w-5 mr-3 text-blue-500"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C6.477 0 2 4.477 2 10h2zm2 5.291l1.341-1.341C7.167 15.208 6 14.165 6 13v3.291z"
+                ></path>
+              </svg>
+              <span>Loading...</span>
+            </div>
           ) : (
             <div>
               <div>
@@ -91,8 +120,8 @@ export default function Page() {
                     Next
                   </Button>
                 ) : (
-                  <Button onClick={handleSave} variant="default" disabled={isSaving}>
-                    {isSaving ? "Saving..." : "Save"}
+                  <Button onClick={handleSave} variant="default" disabled={isGenerating}>
+                    {isGenerating ? 'Generating...' : 'Save'}
                   </Button>
                 )}
               </div>
