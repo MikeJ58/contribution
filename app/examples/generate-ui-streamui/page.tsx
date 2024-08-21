@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Dialog } from '@/components/ui/dialog'; // Shadcn Dialog component
 import { Button } from '@/components/ui/button'; // Shadcn Button component
 import { generateResponse } from './action'; // Server-side action to generate responses
@@ -12,25 +12,30 @@ export default function Page() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [contributions, setContributions] = useState<{ question: string; answer: string }[]>([]);
 
-  const handleGenerateInitial = useCallback(async () => {
-    setIsGenerating(true);
-    const firstQuestion = 'What is your name and what do you do? Please give a detailed response.';
-    const firstAnswer = await generateResponse(firstQuestion);
+  // Load questions when the component mounts
+  useEffect(() => {
+    const loadQuestions = async () => {
+      setIsGenerating(true);
+      const firstQuestion = 'What is your name and what do you do? Please give a detailed response.';
+      const firstAnswer = await generateResponse(firstQuestion);
 
-    setSteps([{ question: firstQuestion, answer: firstAnswer }]);
-    setIsGenerating(false);
+      setSteps([{ question: firstQuestion, answer: firstAnswer }]);
 
-    const moreQuestions = [
-      'Can you describe a challenging project you have worked on recently and how you overcame it?',
-      'What are your long-term goals and how do you plan to achieve them?',
-    ];
-    const promises = moreQuestions.map(async (question) => {
-      const answer = await generateResponse(question);
-      return { question, answer };
-    });
+      const moreQuestions = [
+        'Can you describe a challenging project you have worked on recently and how you overcame it?',
+        'What are your long-term goals and how do you plan to achieve them?',
+      ];
+      const promises = moreQuestions.map(async (question) => {
+        const answer = await generateResponse(question);
+        return { question, answer };
+      });
 
-    const newSteps = await Promise.all(promises);
-    setSteps((prev) => [...prev, ...newSteps]);
+      const newSteps = await Promise.all(promises);
+      setSteps((prev) => [...prev, ...newSteps]);
+      setIsGenerating(false);
+    };
+
+    loadQuestions();
   }, []);
 
   const handleNext = useCallback(() => {
@@ -63,10 +68,8 @@ export default function Page() {
   }, [steps]);
 
   const handleOpenDialog = useCallback(() => {
-    setIsGenerating(true);
     setOpen(true);
-    handleGenerateInitial();
-  }, [handleGenerateInitial]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4">
